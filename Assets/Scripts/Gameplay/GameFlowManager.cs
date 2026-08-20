@@ -30,6 +30,10 @@ namespace Magma.Gameplay
         /// <summary>Fiche de l'artiste choisi pour la session, nulle avant validation du choix.</summary>
         public ArtistProfile SelectedArtist { get; private set; }
 
+        [Header("Test autonome d'une scène")]
+        [Tooltip("Utilisée uniquement si aucun artiste n'a encore été choisi (ex: on lance directement une scène de mini-jeu en Play plutôt que de passer par le Menu Principal). Permet aux jauges de partir de valeurs cohérentes et persistantes au lieu de 0.")]
+        [SerializeField] private ArtistProfile defaultArtistProfileForStandaloneTesting;
+
         /// <summary>
         /// Valeurs courantes des statistiques de l'artiste (0-100), conservées en mémoire pendant
         /// toute la session et modifiables par les mini-jeux et les concerts via <see cref="ReportMiniGameResult"/>.
@@ -64,6 +68,28 @@ namespace Magma.Gameplay
             Instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
+
+            EnsureStatsInitialized();
+        }
+
+        /// <summary>
+        /// Initialise les statistiques avec l'artiste par défaut si aucun artiste n'a encore été
+        /// choisi via <see cref="ConfirmArtistSelection"/>. Couvre le cas où l'on démarre le jeu en
+        /// Play directement sur une scène de mini-jeu ou de hub, sans passer par le flux normal.
+        /// </summary>
+        private void EnsureStatsInitialized()
+        {
+            if (artistStats.Count > 0)
+            {
+                return;
+            }
+
+            SelectedArtist = defaultArtistProfileForStandaloneTesting;
+
+            foreach (StatType stat in StatTypes)
+            {
+                artistStats[stat] = SelectedArtist != null ? SelectedArtist.GetBaseStat(stat) : MinStatValue;
+            }
         }
 
         private void OnDestroy()
