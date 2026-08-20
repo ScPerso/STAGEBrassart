@@ -475,13 +475,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 271443525}
   m_SourcePrefab: {fileID: 100100000, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
 --- !u!224 &271443523 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6940304612104035776, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
   m_PrefabInstance: {fileID: 271443522}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &271443524 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+  m_PrefabInstance: {fileID: 271443522}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &271443525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 271443524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1e4b2ecf876e564e92ef85f008e200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.UI.UIButtonSfx
+  hoverClip: {fileID: 8300000, guid: f7df97229c20c3e43adc5655142a163f, type: 3}
+  clickClip: {fileID: 8300000, guid: fe94c4bedeb18ae4b820cb0fc4a0a106, type: 3}
+  volume: 1
 --- !u!1001 &349844756
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -609,13 +632,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 349844759}
   m_SourcePrefab: {fileID: 100100000, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
 --- !u!224 &349844757 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6940304612104035776, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
   m_PrefabInstance: {fileID: 349844756}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &349844758 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+  m_PrefabInstance: {fileID: 349844756}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &349844759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349844758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1e4b2ecf876e564e92ef85f008e200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.UI.UIButtonSfx
+  hoverClip: {fileID: 8300000, guid: f7df97229c20c3e43adc5655142a163f, type: 3}
+  clickClip: {fileID: 8300000, guid: fe94c4bedeb18ae4b820cb0fc4a0a106, type: 3}
+  volume: 1
 --- !u!1 &352099984
 GameObject:
   m_ObjectHideFlags: 0
@@ -703,6 +749,7 @@ GameObject:
   - component: {fileID: 445645535}
   - component: {fileID: 445645534}
   - component: {fileID: 445645533}
+  - component: {fileID: 445645536}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -811,6 +858,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 445645531}
   m_CullTransparentMesh: 1
+--- !u!114 &445645536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445645531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1e4b2ecf876e564e92ef85f008e200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.UI.UIButtonSfx
+  hoverClip: {fileID: 8300000, guid: f7df97229c20c3e43adc5655142a163f, type: 3}
+  clickClip: {fileID: 8300000, guid: fe94c4bedeb18ae4b820cb0fc4a0a106, type: 3}
+  volume: 1
 --- !u!1 &462759554
 GameObject:
   m_ObjectHideFlags: 0
@@ -1883,13 +1945,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1566539146}
   m_SourcePrefab: {fileID: 100100000, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
 --- !u!224 &1566539144 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6940304612104035776, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
   m_PrefabInstance: {fileID: 1566539143}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1566539145 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+  m_PrefabInstance: {fileID: 1566539143}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1566539146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566539145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1e4b2ecf876e564e92ef85f008e200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.UI.UIButtonSfx
+  hoverClip: {fileID: 8300000, guid: f7df97229c20c3e43adc5655142a163f, type: 3}
+  clickClip: {fileID: 8300000, guid: fe94c4bedeb18ae4b820cb0fc4a0a106, type: 3}
+  volume: 1
 --- !u!1 &1604845230
 GameObject:
   m_ObjectHideFlags: 0
@@ -2246,6 +2331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b56892ca09cb6584ea6d6cfa2d4edfd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.GameFlowManager
+  defaultArtistProfileForStandaloneTesting: {fileID: 0}
 --- !u!1 &2041707459
 GameObject:
   m_ObjectHideFlags: 0
@@ -2481,13 +2567,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5270095238750429473}
   m_SourcePrefab: {fileID: 100100000, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
 --- !u!224 &5270095238750429471 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6940304612104035776, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
   m_PrefabInstance: {fileID: 5270095238750429470}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5270095238750429472 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8063535189042553171, guid: 7621843e1c492a0479c506f859acbb92, type: 3}
+  m_PrefabInstance: {fileID: 5270095238750429470}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5270095238750429473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5270095238750429472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1e4b2ecf876e564e92ef85f008e200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Magma.Gameplay::Magma.Gameplay.UI.UIButtonSfx
+  hoverClip: {fileID: 8300000, guid: f7df97229c20c3e43adc5655142a163f, type: 3}
+  clickClip: {fileID: 8300000, guid: fe94c4bedeb18ae4b820cb0fc4a0a106, type: 3}
+  volume: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

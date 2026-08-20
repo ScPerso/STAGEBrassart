@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Magma.Gameplay.Stage
 {
     /// <summary>
-    /// HUD de session (IMGUI, placeholder léger) et bilan de fin (UI réelle) du mini-jeu de
+    /// HUD de session (Canvas ancré, sûr sur mobile) et bilan de fin (UI réelle) du mini-jeu de
     /// prestation scénique. Le bilan affiche le score, la précision, puis anime la jauge de
     /// Prestation Scénique de sa valeur actuelle vers sa nouvelle valeur pour rendre visible le
     /// gain (ou la perte) obtenu. Un seul bouton "Continuer" remonte le résultat à la boucle de
@@ -21,6 +21,10 @@ namespace Magma.Gameplay.Stage
 
         /// <summary>Durée de l'animation de remplissage de la jauge pendant le bilan, en secondes.</summary>
         private const float GaugeAnimationDuration = 1.2f;
+
+        [Header("HUD de session (pendant la partie)")]
+        [Tooltip("Texte du score en cours, ancré en haut du Canvas avec une marge de sécurité (évite l'encoche/la barre de statut sur mobile).")]
+        [SerializeField] private TextMeshProUGUI sessionHudLabel;
 
         [Header("Panneau de bilan")]
         [Tooltip("Racine du panneau de bilan, masquée tant que la session n'est pas terminée.")]
@@ -39,6 +43,13 @@ namespace Magma.Gameplay.Stage
 
         [Tooltip("Bouton Continuer, désactivé pendant l'animation pour forcer à voir le résultat avant de continuer.")]
         [SerializeField] private Button continueButton;
+
+        [Header("Son du remplissage de jauge")]
+        [Tooltip("Source audio utilisée pour jouer le son de remplissage pendant l'animation de la jauge.")]
+        [SerializeField] private AudioSource gaugeFillAudioSource;
+
+        [Tooltip("Clip joué pendant que le pourcentage de réussite se déverse dans la jauge.")]
+        [SerializeField] private AudioClip gaugeFillClip;
 
         private StageRhythmManager stageRhythmManager;
         private MiniGameResult result;
@@ -63,6 +74,24 @@ namespace Magma.Gameplay.Stage
         private void OnDisable()
         {
             stageRhythmManager.Completed -= OnSessionCompleted;
+        }
+
+        private void Update()
+        {
+            RefreshSessionHud();
+        }
+
+        /// <summary>Rafraîchit le score affiché en haut de l'écran tant que le bilan n'est pas affiché.</summary>
+        private void RefreshSessionHud()
+        {
+            if (sessionHudLabel == null || (resultPanel != null && resultPanel.activeSelf))
+            {
+                return;
+            }
+
+            sessionHudLabel.text = "Reussites : " + stageRhythmManager.SuccessCount
+                + "   Rates : " + stageRhythmManager.FailureCount
+                + "   Temps : " + stageRhythmManager.TimeRemaining.ToString("F0") + "s";
         }
 
         private static void ConfigureVerticalGauge(Image gauge)
@@ -107,6 +136,11 @@ namespace Magma.Gameplay.Stage
                 resultPanel.SetActive(true);
             }
 
+            if (sessionHudLabel != null)
+            {
+                sessionHudLabel.gameObject.SetActive(false);
+            }
+
             if (continueButton != null)
             {
                 // Le bouton reste inactif tant que le transfert du pourcentage vers la jauge n'est pas visible.
@@ -130,6 +164,7 @@ namespace Magma.Gameplay.Stage
         {
             ApplyGaugeValue(fromGaugeValue);
             ApplyTransferValue(accuracyPercent);
+            PlayGaugeFillSound();
 
             float elapsed = 0f;
 
@@ -144,11 +179,33 @@ namespace Magma.Gameplay.Stage
 
             ApplyGaugeValue(toGaugeValue);
             ApplyTransferValue(0f);
+            StopGaugeFillSound();
             gaugeAnimationRoutine = null;
 
             if (continueButton != null)
             {
                 continueButton.interactable = true;
+            }
+        }
+
+        /// <summary>Démarre le son de remplissage, rejoué depuis le début à chaque bilan.</summary>
+        private void PlayGaugeFillSound()
+        {
+            if (gaugeFillAudioSource == null || gaugeFillClip == null)
+            {
+                return;
+            }
+
+            gaugeFillAudioSource.clip = gaugeFillClip;
+            gaugeFillAudioSource.Play();
+        }
+
+        /// <summary>Coupe le son de remplissage dès que la jauge a fini de se remplir.</summary>
+        private void StopGaugeFillSound()
+        {
+            if (gaugeFillAudioSource != null)
+            {
+                gaugeFillAudioSource.Stop();
             }
         }
 
@@ -187,33 +244,6 @@ namespace Magma.Gameplay.Stage
             {
                 Debug.LogWarning("StageResultUI: no GameFlowManager instance found, cannot report the mini-game result.");
             }
-        }
-
-        private void OnGUI()
-        {
-            if (resultPanel == null || !resultPanel.activeSelf)
-            {
-                DrawHud();
-            }
-        }
-
-        private void DrawHud()
-        {
-            string hudText = "Reussites : " + stageRhythmManager.SuccessCount
-                + "   Rates : " + stageRhythmManager.FailureCount
-                + "   Temps : " + stageRhythmManager.TimeRemaining.ToString("F0") + "s";
-
-            GUI.Label(new Rect(0f, 12f, Screen.width, 30f), hudText, BuildCenteredStyle());
-        }
-
-        private static GUIStyle BuildCenteredStyle()
-        {
-            return new GUIStyle(GUI.skin.label)
-            {
-                alignment = TextAnchor.UpperCenter,
-                fontSize = 20,
-                fontStyle = FontStyle.Bold
-            };
         }
     }
 }
