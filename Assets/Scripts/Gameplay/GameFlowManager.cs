@@ -27,9 +27,28 @@ namespace Magma.Gameplay
         /// <summary>Crédits de formation restants pour la phase courante.</summary>
         public int CreditsRemaining { get; private set; } = CreditsPerTrainingPhase;
 
-        /// <summary>Cumul des gains de statistique de l'artiste sur la session.</summary>
+        /// <summary>Fiche de l'artiste choisi pour la session, nulle avant validation du choix.</summary>
+        public ArtistProfile SelectedArtist { get; private set; }
+
+        /// <summary>
+        /// Valeurs courantes des statistiques de l'artiste (0-100), conservées en mémoire pendant
+        /// toute la session et modifiables par les mini-jeux et les concerts via <see cref="ReportMiniGameResult"/>.
+        /// </summary>
         public IReadOnlyDictionary<StatType, int> ArtistStats => artistStats;
         private readonly Dictionary<StatType, int> artistStats = new Dictionary<StatType, int>();
+
+        /// <summary>Valeur minimale/maximale d'une jauge de statistique.</summary>
+        private const int MinStatValue = 0;
+        private const int MaxStatValue = 100;
+
+        /// <summary>Toutes les statistiques suivies pour un artiste.</summary>
+        private static readonly StatType[] StatTypes = (StatType[])Enum.GetValues(typeof(StatType));
+
+        /// <summary>Renvoie la valeur courante (0-100) de la statistique demandée.</summary>
+        public int GetStat(StatType stat)
+        {
+            return artistStats.TryGetValue(stat, out int value) ? value : 0;
+        }
 
         /// <summary>Déclenché quand le concert final est résolu, pour afficher le bilan de fin de parcours.</summary>
         public event Action FinalReportReady;
@@ -70,9 +89,27 @@ namespace Magma.Gameplay
             SceneManager.LoadScene(SceneNames.ArtistSelection);
         }
 
-        /// <summary>Confirme l'artiste choisi et ouvre le premier rendez-vous d'accompagnement.</summary>
-        public void ConfirmArtistSelection()
+        /// <summary>Quitte l'application. Branché sur le bouton "Quitter" du menu principal.</summary>
+        public void QuitGame()
         {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        /// <summary>Confirme l'artiste choisi, initialise ses statistiques de départ et ouvre le premier rendez-vous.</summary>
+        public void ConfirmArtistSelection(ArtistProfile artist)
+        {
+            SelectedArtist = artist;
+            artistStats.Clear();
+
+            foreach (StatType stat in StatTypes)
+            {
+                artistStats[stat] = artist != null ? artist.GetBaseStat(stat) : MinStatValue;
+            }
+
             CreditsRemaining = CreditsPerTrainingPhase;
             SceneManager.LoadScene(SceneNames.WorkshopHub);
         }
@@ -123,8 +160,8 @@ namespace Magma.Gameplay
 
         private void AddStatGain(StatType stat, int gain)
         {
-            artistStats.TryGetValue(stat, out int current);
-            artistStats[stat] = current + gain;
+            int current = GetStat(stat);
+            artistStats[stat] = Mathf.Clamp(current + gain, MinStatValue, MaxStatValue);
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
