@@ -1,8 +1,15 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
+/// <summary>
+/// QTE circulaire : l'anneau d'approche se referme sur la cible et la précision dépend de
+/// l'écart à l'échelle de validation. Le clic UI et les touches Entrée/Espace sont pris en charge.
+/// </summary>
 public class CircleQTE : MonoBehaviour
 {
-    [Header("R�f�rences")]
+    private const float DefaultMaximumAccuracyError = 1.5f;
+
+    [Header("Références")]
     [SerializeField] private RectTransform approachCircle;
     [SerializeField] private RectTransform hitCircle;
 
@@ -10,46 +17,41 @@ public class CircleQTE : MonoBehaviour
     [SerializeField] private float startScale = 2.5f;
     [SerializeField] private float endScale = 1f;
     [SerializeField] private float duration = 2f;
+    [SerializeField] private float maximumAccuracyError = DefaultMaximumAccuracyError;
 
     private float timer;
     private bool isActive;
+    private IQTECircleHit qteHitReceiver;
 
-    private IQTECircleHit qteHit;
-
-    public void Initialize(
-        float qteDuration,
-        IQTECircleHit hitReceiver
-    )
+    /// <summary>Initialise le QTE avec sa durée et le gestionnaire qui recevra son résultat.</summary>
+    public void Initialize(float qteDuration, IQTECircleHit hitReceiver)
     {
-        duration = qteDuration;
-
-        qteHit = hitReceiver;
-
+        duration = Mathf.Max(0.1f, qteDuration);
+        qteHitReceiver = hitReceiver;
         StartQTE();
     }
 
     private void Update()
     {
         if (!isActive)
+        {
             return;
+        }
 
         timer += Time.deltaTime;
+        float progress = Mathf.Clamp01(timer / duration);
 
-        float progress =
-            timer / duration;
+        if (approachCircle != null)
+        {
+            float currentScale = Mathf.Lerp(startScale, endScale, progress);
+            approachCircle.localScale = Vector3.one * currentScale;
+        }
 
-        progress =
-            Mathf.Clamp01(progress);
-
-        float currentScale =
-            Mathf.Lerp(
-                startScale,
-                endScale,
-                progress
-            );
-
-        approachCircle.localScale =
-            Vector3.one * currentScale;
+        if (WasConfirmPressed())
+        {
+            OnPlayerClick();
+            return;
+        }
 
         if (progress >= 1f)
         {
@@ -57,75 +59,58 @@ public class CircleQTE : MonoBehaviour
         }
     }
 
+    /// <summary>Active ou réactive le QTE à son état initial.</summary>
     public void StartQTE()
     {
         timer = 0f;
-
         isActive = true;
 
-        approachCircle.localScale =
-            Vector3.one * startScale;
+        if (approachCircle != null)
+        {
+            approachCircle.localScale = Vector3.one * startScale;
+        }
     }
 
+    /// <summary>Résout le QTE avec la précision correspondant au moment de l'action du joueur.</summary>
     public void OnPlayerClick()
     {
-        if (!isActive)
+        if (!isActive || approachCircle == null)
+        {
             return;
-
-        float currentScale =
-            approachCircle.localScale.x;
-
-        float error =
-            Mathf.Abs(
-                currentScale - endScale
-            );
-
-        float accuracy =
-            CalculateAccuracy(error);
-
-        if (qteHit != null)
-        {
-            qteHit.Hit(accuracy);
-        }
-        else
-        {
-            Debug.LogError(
-                "Aucun IQTECircleHit trouv� !"
-            );
         }
 
-        Debug.Log(
-            "Pr�cision : "
-            + accuracy.ToString("F1")
-            + "%"
-        );
-
+        float error = Mathf.Abs(approachCircle.localScale.x - endScale);
+        float accuracy = CalculateAccuracy(error);
         isActive = false;
-
+        qteHitReceiver?.Hit(accuracy);
         Destroy(gameObject);
     }
 
-    private float CalculateAccuracy(
-        float error
-    )
+    private bool WasConfirmPressed()
     {
-        float maxError = 1.5f;
+        Keyboard keyboard = Keyboard.current;
+        bool keyboardPressed = keyboard != null
+            && (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame);
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
 
-        float accuracy =
-            1f - (error / maxError);
+        return keyboardPressed || gamepadPressed;
+    }
 
-        accuracy =
-            Mathf.Clamp01(accuracy);
-
-        return accuracy * 100f;
+    private float CalculateAccuracy(float error)
+    {
+        float safeMaximumError = Mathf.Max(0.01f, maximumAccuracyError);
+        return Mathf.Clamp01(1f - error / safeMaximumError) * 100f;
     }
 
     private void FailQTE()
     {
+        if (!isActive)
+        {
+            return;
+        }
+
         isActive = false;
-
-        Debug.Log("QTE rat� !");
-
+        qteHitReceiver?.Miss();
         Destroy(gameObject);
     }
 }
