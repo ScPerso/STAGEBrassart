@@ -11,20 +11,34 @@ namespace Magma.Rhythm
     public class NoteJudge
     {
         /// <summary>
-        /// Fenêtre Perfect par défaut (secondes), valeur historique du projet. Sert aussi
-        /// de fenêtre de glow par défaut aux notes (<see cref="FallingNote"/>).
+        /// Fenêtre Perfect par défaut (secondes). Calibrée pour rester musicale : à 100 BPM
+        /// un temps vaut 0,6 s, donc ±0,11 s représente environ un cinquième de temps.
+        /// Sert aussi de fenêtre de glow par défaut aux notes (<see cref="FallingNote"/>).
         /// </summary>
-        public const float PerfectWindowSeconds = 0.6f;
+        public const float PerfectWindowSeconds = 0.11f;
 
-        /// <summary>Fenêtre Good par défaut (secondes), valeur historique du projet.</summary>
-        public const float GoodWindowSeconds = 1.0f;
+        /// <summary>
+        /// Fenêtre Good par défaut (secondes). Volontairement généreuse pour un public large,
+        /// tout en restant sous la moitié de l'écart minimal entre deux notes d'une colonne
+        /// (0,6 s en chart facile) afin qu'un appui ne puisse jamais viser deux notes à la fois.
+        /// </summary>
+        public const float GoodWindowSeconds = 0.22f;
 
         /// <summary>Au-delà de ce retard (secondes), une note est expirée (Miss définitif).</summary>
-        public const float MissWindowSeconds = 1.0f;
+        public const float MissWindowSeconds = 0.22f;
 
         private readonly float perfectWindow;
         private readonly float goodWindow;
         private readonly float missWindow;
+
+        /// <summary>Fenêtre Perfect effectivement utilisée par ce juge, en secondes.</summary>
+        public float PerfectWindow => perfectWindow;
+
+        /// <summary>Fenêtre Good effectivement utilisée par ce juge, en secondes.</summary>
+        public float GoodWindow => goodWindow;
+
+        /// <summary>Retard au-delà duquel ce juge considère une note expirée, en secondes.</summary>
+        public float MissWindow => missWindow;
 
         /// <summary>
         /// Crée un juge avec des fenêtres explicites, en secondes.

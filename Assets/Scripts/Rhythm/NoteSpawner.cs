@@ -42,6 +42,8 @@ namespace Magma.Rhythm
 
         private Conductor conductor;
         private float lookahead;
+        private float missWindowSeconds = NoteJudge.MissWindowSeconds;
+        private float highlightWindowSeconds = NoteJudge.PerfectWindowSeconds;
         private int spawnCursor;
         private bool isReady;
         private bool prewarmed;
@@ -55,6 +57,28 @@ namespace Magma.Rhythm
         /// <summary>Nombre de colonnes configurées.</summary>
         public int LaneCount => lanes != null ? lanes.Length : 0;
 
+        /// <summary>
+        /// Hauteur monde (Y) exacte qu'occupe une note à l'instant précis de son temps cible.
+        /// Une note parcourt tout le champ en <c>lookahead + noteTrailSeconds</c> ; au moment
+        /// du beat, elle n'a donc parcouru que la fraction <c>lookahead / total</c>. C'est à
+        /// cette hauteur, et nulle part ailleurs, que doit se trouver la ligne de frappe
+        /// visuelle pour que l'image corresponde au son.
+        /// </summary>
+        public float HitLineHeight
+        {
+            get
+            {
+                float total = lookahead + noteTrailSeconds;
+
+                if (total <= 0f)
+                {
+                    return despawnHeight;
+                }
+
+                return Mathf.LerpUnclamped(spawnHeight, despawnHeight, lookahead / total);
+            }
+        }
+
         /// <summary>Vrai quand toutes les notes ont été jouées et le champ est vide.</summary>
         public bool IsFinished => isReady && spawnCursor >= orderedNotes.Count && activeNotes.Count == 0;
 
@@ -64,10 +88,25 @@ namespace Magma.Rhythm
         /// <param name="track">Morceau fournissant la liste de notes.</param>
         /// <param name="conductor">Horloge audio pilotant le temps du morceau.</param>
         /// <param name="lookahead">Avance, en secondes, entre l'apparition et le temps cible.</param>
-        public void Setup(SongTrack track, Conductor conductor, float lookahead)
+        /// <param name="missWindowSeconds">
+        /// Retard, en secondes, au-delà duquel une note non frappée devient un raté définitif.
+        /// Doit valoir la fenêtre de raté du juge pour que score et visuel restent cohérents.
+        /// </param>
+        /// <param name="highlightWindowSeconds">
+        /// Demi-largeur, en secondes, de la fenêtre de glow transmise à chaque note (fenêtre Perfect).
+        /// </param>
+        public void Setup(
+            SongTrack track,
+            Conductor conductor,
+            float lookahead,
+            float missWindowSeconds,
+            float highlightWindowSeconds
+        )
         {
             this.conductor = conductor;
             this.lookahead = lookahead;
+            this.missWindowSeconds = missWindowSeconds;
+            this.highlightWindowSeconds = highlightWindowSeconds;
 
             EnsurePrewarmed();
             Clear();
@@ -122,19 +161,20 @@ namespace Magma.Rhythm
         }
 
         /// <summary>
-        /// Position monde du bas d'une colonne, utile pour placer un retour de raté.
+        /// Position monde d'une colonne à la hauteur de la ligne de frappe, là où doit
+        /// s'afficher un retour de jugement (par exemple un raté).
         /// </summary>
         /// <param name="lane">Index de la colonne.</param>
-        /// <returns>La position monde en bas de la colonne.</returns>
-        public Vector3 GetLaneBottomPosition(int lane)
+        /// <returns>La position monde sur la ligne de frappe de la colonne.</returns>
+        public Vector3 GetLaneHitPosition(int lane)
         {
             if (lanes == null || lanes.Length == 0)
             {
-                return new Vector3(0f, despawnHeight, 0f);
+                return new Vector3(0f, HitLineHeight, 0f);
             }
 
             int laneIndex = Mathf.Clamp(lane, 0, lanes.Length - 1);
-            return new Vector3(lanes[laneIndex].xPosition, despawnHeight, 0f);
+            return new Vector3(lanes[laneIndex].xPosition, HitLineHeight, 0f);
         }
 
         /// <summary>Recycle toutes les notes actives et vide le champ.</summary>
@@ -195,7 +235,14 @@ namespace Magma.Rhythm
             float spawnSongTime = note.beatTime - lookahead;
             float totalTravelTime = lookahead + noteTrailSeconds;
 
-            fallingNote.Initialize(note, spawnSongTime, totalTravelTime, topPosition, bottomPosition);
+            fallingNote.Initialize(
+                note,
+                spawnSongTime,
+                totalTravelTime,
+                topPosition,
+                bottomPosition,
+                highlightWindowSeconds
+            );
 
             activeNotes.Add(fallingNote);
             activeData.Add(note);
@@ -212,8 +259,8 @@ namespace Magma.Rhythm
 
                 note.Tick(songTime);
 
-                // A note that flew past the good window without being hit is a definitive miss.
-                if (!note.IsResolved && songTime - note.TargetTime > NoteJudge.GoodWindowSeconds)
+                // A note that flew past its miss window without being hit is a definitive miss.
+                if (!note.IsResolved && songTime - note.TargetTime > missWindowSeconds)
                 {
                     note.Resolve();
                     OnNoteExpired?.Invoke(data);

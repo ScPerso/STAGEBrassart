@@ -29,18 +29,18 @@ namespace Magma.Gameplay.Rehearsal
         [SerializeField] private Key[] laneKeys;
 
         [Header("Fenêtres de jugement (secondes)")]
-        [Tooltip("Fenêtre Perfect (valeur historique du projet : 0.6).")]
+        [Tooltip("Fenêtre Perfect. À 100 BPM un temps vaut 0,6 s : rester bien en dessous garde le jugement musical.")]
         [SerializeField] private float perfectWindow = DefaultPerfectWindow;
 
-        [Tooltip("Fenêtre Good (valeur historique du projet : 1.0).")]
+        [Tooltip("Fenêtre Good. Doit rester sous la moitié de l'écart minimal entre deux notes d'une colonne.")]
         [SerializeField] private float goodWindow = DefaultGoodWindow;
 
-        [Tooltip("Fenêtre d'expiration en retard (valeur historique du projet : 1.0).")]
+        [Tooltip("Retard au-delà duquel une note non frappée devient un raté définitif.")]
         [SerializeField] private float missWindow = DefaultMissWindow;
 
-        private const float DefaultPerfectWindow = 0.6f;
-        private const float DefaultGoodWindow = 1.0f;
-        private const float DefaultMissWindow = 1.0f;
+        private const float DefaultPerfectWindow = NoteJudge.PerfectWindowSeconds;
+        private const float DefaultGoodWindow = NoteJudge.GoodWindowSeconds;
+        private const float DefaultMissWindow = NoteJudge.MissWindowSeconds;
 
         // The piano rehearsal keeps a flat multiplier to preserve historical scoring;
         // the combo is tracked and available for other mini-games (e.g. Concert).
@@ -132,7 +132,9 @@ namespace Magma.Gameplay.Rehearsal
             scorer.Reset();
             combo.Reset();
 
-            noteSpawner.Setup(songTrack, conductor, songTrack.travelTime);
+            // The spawner and the notes must judge, expire and glow on the very same windows as
+            // the judge, otherwise what the player sees stops matching what the player scores.
+            noteSpawner.Setup(songTrack, conductor, songTrack.travelTime, judge.MissWindow, judge.PerfectWindow);
             conductor.Play(songTrack);
 
             isRunning = true;
@@ -251,7 +253,7 @@ namespace Magma.Gameplay.Rehearsal
             combo.RegisterHit(Judgement.Miss);
             scorer.Register(Judgement.Miss, PianoScoreMultiplier);
 
-            Judged?.Invoke(Judgement.Miss, noteSpawner.GetLaneBottomPosition(note.laneIndex));
+            Judged?.Invoke(Judgement.Miss, noteSpawner.GetLaneHitPosition(note.laneIndex));
         }
 
         private int GetLaneFromScreenX(float screenX)

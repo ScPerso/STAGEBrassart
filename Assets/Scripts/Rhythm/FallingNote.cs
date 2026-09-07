@@ -15,6 +15,7 @@ namespace Magma.Rhythm
         private NoteData noteData;
         private float spawnSongTime;
         private float totalTravelTime;
+        private float highlightWindowSeconds = NoteJudge.PerfectWindowSeconds;
         private INoteMovement movement;
         private INoteHighlight highlight;
 
@@ -45,12 +46,17 @@ namespace Magma.Rhythm
         /// <param name="totalTravelTime">Durée, en secondes, de la chute complète haut-bas.</param>
         /// <param name="topPosition">Position monde en haut de la colonne.</param>
         /// <param name="bottomPosition">Position monde en bas de la colonne.</param>
+        /// <param name="highlightWindowSeconds">
+        /// Demi-largeur, en secondes, de la fenêtre où la note s'illumine. Doit valoir la
+        /// fenêtre Perfect du juge pour que le halo corresponde exactement au score obtenu.
+        /// </param>
         public void Initialize(
             NoteData note,
             float spawnSongTime,
             float totalTravelTime,
             Vector3 topPosition,
-            Vector3 bottomPosition
+            Vector3 bottomPosition,
+            float highlightWindowSeconds
         )
         {
             // Reset resolution so a pooled note can be reused cleanly (neutral for a fresh note).
@@ -59,6 +65,7 @@ namespace Magma.Rhythm
             noteData = note;
             this.spawnSongTime = spawnSongTime;
             this.totalTravelTime = totalTravelTime;
+            this.highlightWindowSeconds = highlightWindowSeconds;
 
             movement = GetComponent<INoteMovement>();
             highlight = GetComponent<INoteHighlight>();
@@ -96,7 +103,7 @@ namespace Magma.Rhythm
             if (highlight != null && !IsResolved)
             {
                 bool inPerfectWindow =
-                    Mathf.Abs(songTime - noteData.beatTime) <= NoteJudge.PerfectWindowSeconds;
+                    Mathf.Abs(songTime - noteData.beatTime) <= highlightWindowSeconds;
 
                 highlight.SetHighlight(inPerfectWindow);
             }
